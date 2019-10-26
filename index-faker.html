@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      src="https://unpkg.com/react@16/umd/react.development.js"
+      crossorigin
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+      crossorigin
+    ></script>
+    <script
+      crossorigin
+      src="https://cdnjs.cloudflare.com/ajax/libs/Faker/3.1.0/faker.js"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.js"
+      crossorigin
+    ></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      let cards = [];
+      for (let i = 0; i < 10; i++) {
+        let card = faker.helpers.createCard();
+        cards.push(card);
+      }
+
+      class SuperComponent extends React.Component {
+        constructor(cards) {
+          super();
+          this.state = {
+            users: cards,
+            favorites: 0
+          };
+        }
+        getNumFavorites() {
+          return this.state.favorites;
+        }
+        increaseFavorites = () => {
+          if (this.state.favorites < this.state.users.length)
+            this.setState({ favorites: this.state.favorites - 1 });
+          //this.state.favorites++;
+          console.log('increasing favs to ' + this.state.favorites);
+        };
+        decreaseFavorites = () => {
+          if (this.state.favorites > 0) this.state.favorites--;
+          console.log('decreasing favs to ' + this.state.favorites);
+        };
+        render() {
+          const componentContext = this;
+          const allUsers = this.state.users.map((card, index) => {
+            let favorite = Math.random() < 0.5;
+            if (favorite) componentContext.state.favorites++;
+            return new User(
+              favorite,
+              index,
+              card,
+              componentContext.increaseFavorites,
+              componentContext.decreaseFavorites
+            ).render();
+          });
+          const app = React.createElement('div', null, [
+            React.createElement(
+              'div',
+              null,
+              `You have ${this.state.favorites} favorites`
+            ),
+            allUsers
+          ]);
+          return app;
+        }
+      }
+
+      class User extends React.Component {
+        constructor(
+          favoriteStatus,
+          uniqueId,
+          userObj,
+          increaseFavorites,
+          decreaseFavorites
+        ) {
+          super();
+          this.state = {
+            isFavorite: favoriteStatus,
+            key: uniqueId,
+            userObj,
+            incrementFavorites: increaseFavorites,
+            decrementFavorites: decreaseFavorites
+          };
+          this.toggleFavoriteStatus = this.toggleFavoriteStatus.bind(this);
+        }
+        currentStyle() {
+          return this.state.isFavorite === true ? 'tomato' : 'blue';
+        }
+        toggleFavoriteStatus = () => {
+          this.state.isFavorite = !this.state.isFavorite;
+          this.setState({ isFavorite: !this.state.isFavorite });
+          console.log(this.state.isFavorite);
+        };
+        render() {
+          //const userContext = this;
+          return React.createElement(
+            'div',
+            {
+              style: { color: this.currentStyle() },
+              key: this.state.key,
+              onClick: function(e) {
+                //userContext.toggleFavoriteStatus();
+                this.toggleFavoriteStatus();
+                e.target.style.color = userContext.currentStyle();
+                if (userContext.state.isFavorite) {
+                  //userContext.state.incrementFavorites();
+                } else {
+                  //userContext.state.decrementFavorites();
+                }
+              }
+            },
+            this.state.userObj.name
+          );
+        }
+      }
+
+      //   const userList = cards.map((card, index) =>
+      //     new User(Math.random() < 0.5 ? false : true, index, card).render()
+      //   );
+
+      ReactDOM.render(
+        new SuperComponent(cards).render(),
+        document.getElementById('root')
+      );
+    </script>
+  </body>
+</html>
