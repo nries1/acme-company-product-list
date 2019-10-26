@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      src="https://unpkg.com/react@16/umd/react.development.js"
+      crossorigin
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+      crossorigin
+    ></script>
+    <script
+      crossorigin
+      src="https://cdnjs.cloudflare.com/ajax/libs/Faker/3.1.0/faker.js"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.js"
+      crossorigin
+    ></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      class ProductsButton extends React.Component {
+        constructor() {
+          super();
+        }
+        componentDidMount() {
+          console.log(this);
+        }
+        render() {
+          return (
+            <button onClick={this.props.chooseView}>
+              Products ({this.props.number})
+            </button>
+          );
+        }
+      }
+      class CompaniesButton extends React.Component {
+        constructor() {
+          super();
+        }
+        componentDidMount() {
+          console.log(this);
+        }
+        render() {
+          return (
+            <button onClick={this.props.chooseView}>
+              Companies ({this.props.number})
+            </button>
+          );
+        }
+      }
+
+      class View extends React.Component {
+        constructor() {
+          super();
+          this.state = {
+            companies: null,
+            products: null,
+            currentView: null
+          };
+        }
+        setProductView = () => {
+          this.setState({ currentView: 'products' });
+        };
+        setCompaniesView = () => {
+          this.setState({ currentView: 'companies' });
+        };
+        componentDidMount() {
+          console.log('I mounted');
+          window
+            .fetch('https://acme-users-api-rev.herokuapp.com/api/companies')
+            .then(data => data.json())
+            .then(data => {
+              this.setState({ companies: data });
+            })
+            .catch(e => {
+              console.log(e);
+            });
+          window
+            .fetch('https://acme-users-api-rev.herokuapp.com/api/products')
+            .then(data => data.json())
+            .then(data => {
+              this.setState({ products: data });
+            });
+        }
+        render() {
+          return (
+            <div id="content-container">
+              <div id="buttons-container">
+                <ProductsButton
+                  number={this.state.products ? this.state.products.length : 0}
+                  chooseView={this.setProductView}
+                />
+                <CompaniesButton
+                  number={
+                    this.state.companies ? this.state.companies.length : 0
+                  }
+                  chooseView={this.setCompaniesView}
+                />
+              </div>
+              <div>
+                {this.state.currentView
+                  ? JSON.stringify(this.state[this.state.currentView])
+                  : 'Select a view to see something'}
+              </div>
+            </div>
+          );
+        }
+      }
+
+      ReactDOM.render(<View />, document.getElementById('root'));
+    </script>
+  </body>
+</html>
