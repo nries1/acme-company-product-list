@@ -21,34 +21,34 @@
   <body>
     <div id="root"></div>
     <script type="text/babel">
-      class ProductsButton extends React.Component {
+      class Button extends React.Component {
         constructor() {
           super();
-        }
-        componentDidMount() {
-          console.log(this);
         }
         render() {
           return (
             <button onClick={this.props.chooseView}>
-              Products ({this.props.number})
+              {this.props.buttonType} ({this.props.number})
             </button>
           );
         }
       }
-      class CompaniesButton extends React.Component {
+
+      class Company extends React.Component {
         constructor() {
           super();
         }
-        componentDidMount() {
-          console.log(this);
+        render() {
+          return <div>{this.props.id}</div>;
+        }
+      }
+
+      class Product extends React.Component {
+        constructor() {
+          super();
         }
         render() {
-          return (
-            <button onClick={this.props.chooseView}>
-              Companies ({this.props.number})
-            </button>
-          );
+          return <div>{this.props.id}</div>;
         }
       }
 
@@ -66,6 +66,25 @@
         };
         setCompaniesView = () => {
           this.setState({ currentView: 'companies' });
+        };
+        companies = () => {
+          return this.state.companies.map(company => (
+            <Company id={company.id} key={company.id} />
+          ));
+        };
+        products = () => {
+          return this.state.products.map(product => (
+            <Product id={product.id} key={product.id} />
+          ));
+        };
+        componentToShow = () => {
+          if (this.state.currentView === 'companies') {
+            return this.companies();
+          } else if (this.state.currentView === 'products') {
+            return this.products();
+          } else {
+            throw new Error('There is no current working view');
+          }
         };
         componentDidMount() {
           console.log('I mounted');
@@ -89,20 +108,22 @@
           return (
             <div id="content-container">
               <div id="buttons-container">
-                <ProductsButton
+                <Button
                   number={this.state.products ? this.state.products.length : 0}
                   chooseView={this.setProductView}
+                  buttonType="products"
                 />
-                <CompaniesButton
+                <Button
                   number={
                     this.state.companies ? this.state.companies.length : 0
                   }
                   chooseView={this.setCompaniesView}
+                  buttonType="companies"
                 />
               </div>
               <div>
                 {this.state.currentView
-                  ? JSON.stringify(this.state[this.state.currentView])
+                  ? this.componentToShow()
                   : 'Select a view to see something'}
               </div>
             </div>
